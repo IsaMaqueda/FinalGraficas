@@ -2,14 +2,17 @@ let renderer = null,
     control = null,
     scene = null,
     camera = null,
+    player = null,
     cameraTargetPlanet = null, //Planet camera points at
     ambientLight = null,
+    playerMode = false,
     global_rotation = true, //Boolean for global rotations
     global_translation = true, //Boolean for global transalations
     SolarSystem = null; //The sun, asteroid belt, and orbits parent group
 
 //Array containing the code for each planet, the order is important
 planets = ['Me', 'Ve', 'Ea', 'Ma', 'Ju', 'Sa', 'Ur', 'Ne', 'Pl']
+asteroids = ['Ab_a', 'Ab_b', 'Ab_c']
 //Arrays that will contain SpaceSpheres representing planets and asteroids
 planetArray = [];
 asteroidArray = [];
@@ -47,6 +50,7 @@ function animate()
             asteroid.sphere.rotation.y += (angle / (asteroid.day * 24)) * daySpeed;
     });
 
+    //controls.update(fract);
 }
 
 //Applies movement to the sun shader
@@ -117,7 +121,6 @@ function run()
     // Render the scene
     renderer.render(scene, camera);
 
-    // Spin the cube for next frame
     animate();
 }
 
@@ -239,22 +242,34 @@ function makeOrbit(d)
 // Recieves an n number
 // Returns an array of SpaceSpheres
 // Uses the same geometry for all asteroids
-function addAsteroids(n)
+async function addAsteroids(n)
 {
     for (let index = 0; index < n; index++)
     {
         //Add a minor orbital offset
         let orbit_offset = Math.random() - 0.6;
-        //Scale the satelite horizontally to a maximum of ten times
-        let equator_scaler = Math.random() * 10;
-        //Apply set scale vertically plus another offset
-        // This causes asteroids to be elipsoids
-        let polar_scaler = equator_scaler + Math.random() * 5 - 2.5;
-        let size_scaler = new THREE.Vector3(equator_scaler, polar_scaler, equator_scaler);
+        //Scale the asteroid down in all 3 dimensions
+        let asteroid_scaler_x = Math.random() * 0.002 + 0.004;
+        let asteroid_scaler_y = Math.random() * 0.002 + 0.004;
+        let asteroid_scaler_z = Math.random() * 0.002 + 0.004;
         //Add a rotation and translation offset
         // based on the asteroid belt range
         let days_offset = Math.random() * 0.6 - 0.4;
         let years_offset = Math.random() * 898.976 - 519.459;
+
+        //Get asteroid model and extract geometry and material
+        let asteroid_geo = null;
+        let asteroid_mat = null;
+        let asteroid_type = Math.round(Math.random() *2);
+        let asteroidModel = await Objects[asteroids[asteroid_type]]
+        asteroidModel.traverse( function ( child )
+        {
+            if ( child.isMesh )
+            {
+                asteroid_geo = child.geometry;
+                asteroid_mat = child.material;
+            }
+        });
         //Create asteroid object
         let asteroid = new SpaceSphere(
             Radii['Ab'],
@@ -263,14 +278,25 @@ function addAsteroids(n)
             new THREE.Object3D,
             (SolarDistances['Ab'] + orbit_offset),
             Tilts['Ab'] + Math.random() * 180 - 90,
-            Geometries['Ab'],
-            Materials['Ab']);
+            asteroid_geo,
+            asteroid_mat);
         //Scales the asteroid
-        asteroid.sphere.scale.add(size_scaler);
+        asteroid.sphere.scale.set(asteroid_scaler_x, asteroid_scaler_y, asteroid_scaler_z);
         asteroid.sphere.castShadow = true;
         asteroid.sphere.recieveShadow = true;
-        //Make the asteroid color brighter
-        asteroid.sphere.material.color.setHSL(0, 0, Math.random() * 0.4 + 0.4)
+        //Make the asteroid color darker depending on the type
+        switch(asteroid_type)
+        {
+            case 0:
+                asteroid.sphere.material.color.setHSL(0, 0, Math.random() * 0.35 + 0.1)
+                break;
+            case 1:
+                asteroid.sphere.material.color.setHSL(0, 0, Math.random() * 0.35 + 0.1)
+                break;
+            case 2:
+                asteroid.sphere.material.color.setHSL(0, 0, Math.random() * 0.35 + 0.3)
+                break;
+        }
         //Adds a y axis offset
         asteroid.sphere.position.y += Math.random() * 2 - 1;
         //Randomly rotates the asteroid around the sun
@@ -278,6 +304,19 @@ function addAsteroids(n)
         //Add asteroid to array
         asteroidArray.push(asteroid);
     }
+
+    //Create the asteroid belt orbit and make it darker
+    let asteroidOrbit = makeOrbit(SolarDistances['Ab'] * au_to_er);
+    asteroidOrbit.material.color.setHSL(0, 0, 0.4);
+    SolarSystem.add(asteroidOrbit);
+
+    //Add asteroids to scene
+    asteroidArray.forEach(asteroid =>
+    {
+        asteroid.parent.add(asteroid.sphere);
+        scene.add(asteroid.parent)
+        asteroid.parent.updateMatrixWorld();
+    });
 }
 
 //Adds n generic moons to a host
@@ -382,9 +421,9 @@ function makePlanet(code)
         Tilts[code],
         returnSphere(Radii[code]),
         Materials[code]);
-
+    
     //Add orbital tilt to the planet parent
-    planet.parent.rotateX(radians(orbitTilts[code]))
+    planet.parent.rotateZ(radians(orbitTilts[code]))
 
     //Add Satelites and rings if applicable
     switch (code)
@@ -445,6 +484,20 @@ function switchTranslation()
     global_translation = !global_translation;
 }
 
+async function addPlayer()
+{
+    
+    player = await Objects['Player'];
+    player.scale.set(0.004, 0.004, 0.004);
+    player.position.z = SolarDistances['Ea'] * au_to_er;
+    player.position.y = Radii['Ea'] + 1;
+    playerMode = !playerMode;
+    controls = new THREE.ThirdPersonControls(player, camera, renderer.domElement );
+	controls.movementSpeed = 2;
+    controls.lookSpeed = 0.01;
+    scene.add(player)
+}
+
 function createScene(canvas)
 {
     // Create the Three.js renderer and attach it to our canvas
@@ -462,9 +515,9 @@ function createScene(canvas)
     // scene.background = new THREE.Color( "rgb(100, 100, 100)" );
 
     // Add  a camera so we can view the scene
-    camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 1, 4000);
-    camera.position.z = 400;
-    camera.position.y = 5;
+    camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 1, 40000);
+    //camera.position.z = 400;
+    //camera.position.y = 5;
     scene.add(camera);
 
     // Create a group to hold all the objects
@@ -480,10 +533,10 @@ function createScene(canvas)
     scene.add(SolarSystem);
     SolarSystem.updateMatrixWorld();
 
-    // add mouse handling so we can rotate the scene
+    //Add mouse handling so we can rotate the scene
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.update();
-
+                
     //Visualization functions
     adjustSizes();
     adjustDistances();
@@ -509,30 +562,19 @@ function createScene(canvas)
         planet.makePlanetOrbit();
         scene.add(planet.parent);
         planet.parent.updateMatrixWorld();
-        planet.orbit.rotateY(radians(orbitTilts[p]))
+        //planet.orbit.rotateY(radians(orbitTilts[p]))
         planet.parent.add(planet.orbit)
         planetArray.push(planet);
     });
 
     //Function that adds asteroids
     addAsteroids(n_Asteroids);
-    //Create the asteroid belt orbit and make it darker
-    let asteroidOrbit = makeOrbit(SolarDistances['Ab'] * au_to_er);
-    asteroidOrbit.material.color.setHSL(0, 0, 0.4);
-    SolarSystem.add(asteroidOrbit);
-
-    //Add asteroids to scene
-    asteroidArray.forEach(asteroid =>
-    {
-        asteroid.parent.add(asteroid.sphere);
-        scene.add(asteroid.parent)
-        asteroid.parent.updateMatrixWorld();
-    });
 
     //Update the camera with the sun as it's target
-    updateCameraTarget(0);
+    //updateCameraTarget(0);
     //Start the camera close to Pluto
     camera.position.z = SolarDistances['Pl'] * au_to_er + 20;
     //Stop translations for easier startup loading
     switchTranslation();
+    //addPlayer();
 }

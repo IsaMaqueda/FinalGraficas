@@ -24,8 +24,9 @@ var Textures =
     Ea: new THREE.TextureLoader().load("../../images/earthmap1k.jpg"),
     Mo: new THREE.TextureLoader().load("../../images/moonmap1k.jpg"),
     Ma: new THREE.TextureLoader().load("../../images/mars_1k_color.jpg"),
-    //Mercury's bump map is used as texture for asteroids
-    Ab: new THREE.TextureLoader().load("../../images/mercurybump.jpg"),
+    Ab_a: new THREE.TextureLoader().load("../../models/asteroid/asteroid_a.png"),
+    Ab_b: new THREE.TextureLoader().load("../../models/asteroid/asteroid_b.png"),
+    Ab_c: new THREE.TextureLoader().load("../../models/asteroid/asteroid_c.png"),
     Ju: new THREE.TextureLoader().load("../../images/jupitermap.jpg"),
     Sa: new THREE.TextureLoader().load("../../images/saturnmap.jpg"),
     Sa_R: new THREE.TextureLoader().load("../../images/saturnringcolor.jpg"),
@@ -35,6 +36,7 @@ var Textures =
     Pl: new THREE.TextureLoader().load("../../images/plutomap1k.jpg"),
     //The Moon's bump map is used as texture for Generic moons
     Gm: new THREE.TextureLoader().load("../../images/moonbump1k.jpg"),
+    Player: new THREE.TextureLoader().load("../../models/ship/ship-mono.png"),
 }
 
 //Noise used for the sun
@@ -61,7 +63,6 @@ var Bumps =
     Ea: new THREE.TextureLoader().load("../../images/earthbump1k.jpg"),
     Mo: new THREE.TextureLoader().load("../../images/moonbump1k.jpg"),
     Ma: new THREE.TextureLoader().load("../../images/mars_1k_topo.jpg"),
-    Ab: new THREE.TextureLoader().load("../../images/moonmap1k.jpg"),
     Pl: new THREE.TextureLoader().load("../../images/plutobump1k.jpg"),
 }
 
@@ -70,6 +71,11 @@ var Normals =
 {
     Ea: new THREE.TextureLoader().load("../../images/earth_normal.jpg"),
     Ma: new THREE.TextureLoader().load("../../images/mars_1k_normal.jpg"),
+    Ab_a: new THREE.TextureLoader().load("../../models/asteroid/asteroid_a-normal.png"),
+    Ab_b: new THREE.TextureLoader().load("../../models/asteroid/asteroid_b-normal.png"),
+    Ab_c: new THREE.TextureLoader().load("../../models/asteroid/asteroid_c-normal.png"),
+    Player: new THREE.TextureLoader().load("../../models/ship/ship-normal.png"),
+
 }
 
 //All materials
@@ -111,7 +117,6 @@ var Materials =
         normalMap: Normals['Ma'],
         normalScale: normal_intensity,
     }),
-    Ab: new THREE.MeshPhongMaterial({map: Textures['Ab']}),
     Ju: new THREE.MeshPhongMaterial({ map: Textures['Ju'] }),
     Sa: new THREE.MeshPhongMaterial({ map: Textures['Sa'] }),
     Sa_R: new THREE.MeshPhongMaterial({
@@ -136,11 +141,29 @@ var Materials =
     Gm: new THREE.MeshPhongMaterial({map: Textures['Gm'],})
 }
 
-//Generic Geometries for moons and asteroids
+//Generic Geometries for moons
 var Geometries =
 {
-    //Generic Asteroid Geometry
-    Ab: new THREE.SphereGeometry(Radii['Ab'],sphere_detail,sphere_detail),
     //Generic Moon Geometry
     Gm: new THREE.SphereGeometry(Radii['Mo'],sphere_detail,sphere_detail),
+}
+
+//Obj files for asteroids, the ship, and aliens
+var Obj =
+{
+    //Generic Asteroid objects
+    Ab_a: "../../models/asteroid/asteroid_a.obj",
+    Ab_b: "../../models/asteroid/asteroid_b.obj",
+    Ab_c: "../../models/asteroid/asteroid_c.obj",
+    Player: "../../models/ship/ship.obj",
+}
+
+//Generic Objects for asteroids, the ship, and aliens
+var Objects =
+{
+    //Generic Asteroid objects
+    Ab_a: loadOBJ(Obj['Ab_a'],Textures['Ab_a'],Normals['Ab_a']),
+    Ab_b: loadOBJ(Obj['Ab_b'],Textures['Ab_b'],Normals['Ab_b']),
+    Ab_c: loadOBJ(Obj['Ab_c'],Textures['Ab_c'],Normals['Ab_c']),
+    Player: loadOBJ(Obj['Player'],Textures['Player'],Normals['Player']),
 }

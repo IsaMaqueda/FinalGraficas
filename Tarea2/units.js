@@ -77,7 +77,7 @@ function adjustDistances()
         Pl: 40,
     }
     //Modify the ratio of AU and Earth's radius
-    au_to_er = 9;
+    au_to_er = 12;
 }
 
 //Size variables
@@ -113,7 +113,7 @@ function adjustSizes()
 {
     Radii =
     {
-        Su: 11,
+        Su: 13,
         Me: 0.383,
         Ve: 0.95,
         Ea: 1,
@@ -269,7 +269,7 @@ var SateliteYears =
 }
 
 //Asteroid variables
-var n_Asteroids = 100;
+var n_Asteroids = 150;
 
 //Halves the number of asteroids
 function lessAsteroids()

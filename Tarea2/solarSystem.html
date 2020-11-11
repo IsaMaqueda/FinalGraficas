@@ -13,11 +13,11 @@
 	<script src="../libs/jquery-ui/jquery-ui.js"></script>
 	<script src="../libs/three.js/three.js"></script>
 	<script src="../libs/three.js/controls/OrbitControls.js"></script>
-	<script src="../libs/math-min/math.min.js"></script>
+	<script src="controller.js"></script>
+	<script src="../libs/three.js/utils/promiseLoader.js"></script>
+	<script src="../libs/three.js/loaders/OBJLoader.js"></script>
 
-	<!--
-	Shaders, must be placed before solarSystem.js
--->
+	<!--Shaders, must be placed before solarSystem.js-->
 	<!-- Shsders are used for the sun -->
 	<script id="fragmentShader" type="x-shader/x-fragment">
 
@@ -80,6 +80,8 @@
 
 	<!-- distance, position, size, number of satelites and asteroids, and time variables -->
 	<script src="units.js"></script>
+	<!-- object loader -->
+	<script src="loader.js"></script>
 	<!-- materials, textures, geometries, detail, light variables -->
 	<script src="materials.js"></script>
 	<!-- Main solar system script -->
