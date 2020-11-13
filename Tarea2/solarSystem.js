@@ -571,7 +571,7 @@ function createScene(canvas)
     addAsteroids(n_Asteroids);
 
     //Update the camera with the sun as it's target
-    //updateCameraTarget(0);
+    updateCameraTarget(0);
     //Start the camera close to Pluto
     camera.position.z = SolarDistances['Pl'] * au_to_er + 20;
     //Stop translations for easier startup loading
