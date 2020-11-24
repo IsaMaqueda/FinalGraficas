@@ -178,6 +178,41 @@ var orbitTilts =
 //Width for all orbits
 var orbit_width = 0.25;
 
+
+//using https://www.hilarispublisher.com/open-access/mathematically-describing-planetary-orbits-in-two-dimensions-2168-9679-1000414.pdf
+//we get the astronomical units for the parametric equation of each orbit
+var orbitMajor={
+
+    Su: 0, //No orbit
+    Me: .3870,
+    Ve: .7219,
+    Ea: 1.0027, //Is used as a base
+    Ma: 1.5241,
+    Ab: 3,
+    Ju: 5.241,
+    Sa: 9.5590,
+    Ur: 19.1848,
+    Ne: 30.0806,
+    Pl: 39.4819,
+
+}
+var orbitMinor={
+
+    Su: 0, //No orbit
+    Me: .3788,
+    Ve: .7219,
+    Ea: 1.0025, //Is used as a base
+    Ma: 1.5173,
+    Ab: 3,
+    Ju: 5.2010,
+    Sa: 9.5231,
+    Ur: 19.1645,
+    Ne: 30.0788,
+    Pl: 34.03099,
+
+}
+
+
 //Time variables
 //Lenght in days it takes to complete a revolution around itself
 // never 0 since it causes division by 0

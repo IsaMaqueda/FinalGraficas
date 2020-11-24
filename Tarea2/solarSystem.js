@@ -138,13 +138,15 @@ material = mesh material
 
 class SpaceSphere
 {
-    constructor(radius, day, year, parent_group, solar_distance, tilt, geometry, material)
+    constructor(radius, day, year, parent_group, solar_distance, tilt, geometry, material, orbitMajor, orbitMinor)
     {
         //Assign variables
         this.radius = radius;
         this.day = day;
         this.year = year;
         this.parent = parent_group;
+        this.orbitMajor = orbitMajor * au_to_er;
+        this.orbitMinor = orbitMinor * au_to_er;
 
         //Array to store local satelites
         this.SatelitesArray = [];
@@ -154,7 +156,7 @@ class SpaceSphere
         this.sphere.receiveShadow = true;
         this.sphere.castShadow = true;
         //Scale distance to earth's radius units and apply
-        this.distance = solar_distance * au_to_er;
+        this.distance = orbitMajor * au_to_er;
         this.sphere.position.z = this.distance;
         //Apply tilt to object
         this.tilt = radians(tilt);
@@ -184,7 +186,7 @@ class SpaceSphere
     //Asigns the orbit to teh object
     makePlanetOrbit()
     {
-        this.orbit = makeOrbit(this.distance);
+        this.orbit = makeOrbit(this.orbitMajor, this.orbitMinor );
     }
 
     //Adds a ring
@@ -229,9 +231,20 @@ function radians(d)
 //Creates the planet orbit
 // Recieves the inner radius
 // Returns a Mesh representing the orbit
-function makeOrbit(d)
+function makeOrbit(x,y)
 {
-    let orbit_g = new THREE.RingGeometry(d, d + orbit_width, orbit_detail);
+    const curve  = new THREE.EllipseCurve(
+        0,  0,            // ax, aY
+        x, y,           // xRadius, yRadius
+        0,  2 * Math.PI,  // aStartAngle, aEndAngle
+        false,            // aClockwise
+        0                 // aRotation
+    );
+    
+    var points = curve.getPoints( 100 );
+
+    let orbit_g = new THREE.BufferGeometry().setFromPoints( points );
+    //let orbit_g = new THREE.RingGeometry(d, d + orbit_width, orbit_detail);
     let orbit_m = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     let orbit = new THREE.Mesh(orbit_g, orbit_m);
     orbit.rotation.x = Math.PI / 2;
@@ -420,7 +433,10 @@ function makePlanet(code)
         SolarDistances[code],
         Tilts[code],
         returnSphere(Radii[code]),
-        Materials[code]);
+        Materials[code],
+        orbitMajor[code],
+        orbitMinor[code]
+        );
     
     //Add orbital tilt to the planet parent
     planet.parent.rotateZ(radians(orbitTilts[code]))
