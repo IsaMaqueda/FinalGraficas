@@ -294,7 +294,9 @@ async function addAsteroids(n)
             asteroid_geo,
             asteroid_mat, 
 		orbitMajor['Ab'],
-		orbitMinor['Ab']
+        orbitMinor['Ab'],
+        (SolarDistances['Ab'] + orbit_offset),
+        (SolarDistances['Ab'] + orbit_offset)
 	);
         //Scales the asteroid
         asteroid.sphere.scale.set(asteroid_scaler_x, asteroid_scaler_y, asteroid_scaler_z);
@@ -361,7 +363,10 @@ function addMoons(n, host)
             Radii['Mo'] + orbit_offset + Radii[host] / au_to_er,  //in Earth's radius units
             Tilts['Mo'] + Math.random() * 90 - 45, //Add a random tilt
             Geometries['Gm'],
-            Materials['Gm']);
+            Materials['Gm'],
+            Radii['Mo'] + orbit_offset + Radii[host] / au_to_er,
+            Radii['Mo'] + orbit_offset + Radii[host] / au_to_er
+            );
         //Scale the satelite
         sat.sphere.scale.add(size_scaler);
         sat.sphere.castShadow = true;
@@ -395,7 +400,10 @@ function makeSun(SolarSystemGroup)
         SolarDistances['Su'],
         Tilts['Su'],
         returnSphere(Radii['Su']),
-        Materials['Su']);
+        Materials['Su'],
+        orbitMajor['Su'],
+        orbitMinor['Su']
+        );
 
     //Makes all Sun's textures repeat wrap
     sun.sphere.material.uniforms.noiseTexture.value.wrapS = THREE.RepeatWrapping;
@@ -458,7 +466,10 @@ function makePlanet(code)
                 Radii['Mo'] + SateliteDistances['Mo'],
                 Tilts['Mo'],
                 returnSphere(Radii['Mo']),
-                Materials['Mo']);
+                Materials['Mo'],
+                Radii['Mo'] + SateliteDistances['Mo'],
+                Radii['Mo'] + SateliteDistances['Mo']
+                );
             moon.sphere.receiveShadow = true;
             moon.sphere.castShadow = true;
             //Add the Moon to Earth
