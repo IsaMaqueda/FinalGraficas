@@ -292,7 +292,10 @@ async function addAsteroids(n)
             (SolarDistances['Ab'] + orbit_offset),
             Tilts['Ab'] + Math.random() * 180 - 90,
             asteroid_geo,
-            asteroid_mat);
+            asteroid_mat, 
+		orbitMajor['Ab'],
+		orbitMinor['Ab']
+	);
         //Scales the asteroid
         asteroid.sphere.scale.set(asteroid_scaler_x, asteroid_scaler_y, asteroid_scaler_z);
         asteroid.sphere.castShadow = true;
@@ -319,7 +322,7 @@ async function addAsteroids(n)
     }
 
     //Create the asteroid belt orbit and make it darker
-    let asteroidOrbit = makeOrbit(SolarDistances['Ab'] * au_to_er);
+    let asteroidOrbit = makeOrbit(orbitMajor['Ab'] * au_to_er, orbitMinor['Ab'] * au_to_er);
     asteroidOrbit.material.color.setHSL(0, 0, 0.4);
     SolarSystem.add(asteroidOrbit);
 
