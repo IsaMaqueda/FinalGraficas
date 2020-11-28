@@ -428,6 +428,13 @@ function makeSunlight()
     sunlight.intensity = solar_intensity * 2;
     sunlight.decay = 2;
     sunlight.castShadow = true;
+
+    //for the shadows 
+    sunlight.shadow.mapSize.width = 4096; // default
+    sunlight.shadow.mapSize.height = 4096; // default
+    sunlight.shadow.camera.near = 0.89; // default
+    sunlight.shadow.camera.far = 500; // default
+
     return sunlight;
 }
 
@@ -537,11 +544,19 @@ function createScene(canvas)
     // Set the viewport size
     renderer.setSize(canvas.width, canvas.height);
 
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
     // Create a new Three.js scene
     scene = new THREE.Scene();
 
     // Set the background color
-    scene.background = new THREE.Color(0.05, 0.05, 0.05);
+    //create the background texture
+    //let backgroundUrl = "images/2k_stars_milky_way.jpg";
+    let texture = new THREE.TextureLoader().load(backgroundUrl);
+
+    // Set the background texture
+    scene.background = texture;
+
+    //scene.background = new THREE.Color(0.05, 0.05, 0.05);
     // scene.background = new THREE.Color( "rgb(100, 100, 100)" );
 
     // Add  a camera so we can view the scene
@@ -596,6 +611,10 @@ function createScene(canvas)
         planet.parent.add(planet.orbit)
         planetArray.push(planet);
     });
+
+    //Create a helper for the shadow camera (optional)
+   // const helper = new THREE.CameraHelper( sunlight.shadow.camera );
+    //scene.add( helper );
 
     //Function that adds asteroids
     addAsteroids(n_Asteroids);
