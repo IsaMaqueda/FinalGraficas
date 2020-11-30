@@ -76,6 +76,34 @@ function adjustDistances()
         Ne: 31,
         Pl: 40,
     }
+
+    orbitMajor={
+        Su: 0,
+        Me: 1.39,
+        Ve: 1.72,
+        Ea: 2,
+        Ma: 2.52,
+        Ab: 3.8, //3.2 - 4.2
+        Ju: 5.241,
+        Sa: 9.5590,
+        Ur: 19.1848,
+        Ne: 30.0806,
+        Pl: 40,
+    }
+    orbitMinor = {
+        Su: 0,
+        Me: 1.39,
+        Ve: 1.72,
+        Ea: 2,
+        Ma: 2.52,
+        Ab: 3.8, //3.2 - 4.2
+        Ju: 5.2010,
+        Sa: 9.5231,
+        Ur: 19.1645,
+        Ne: 30.0788,
+        Pl: 40,
+    }
+    
     //Modify the ratio of AU and Earth's radius
     au_to_er = 12;
 }
