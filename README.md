@@ -1,7 +1,6 @@
 # FinalGraficas
 
-## El proyecto final propuesto fue el siguiente:
-## continuando el Sistema Solar de la Tarea 2, añadir valores reales al sistema solar, al igual que 
+## El proyecto final propuesto fue el siguiente: continuando el Sistema Solar de la Tarea 2, añadir valores reales al sistema solar, al igual que crear un minijuego. 
 
 ## Requerimientos Fucnionales
 * *Crea 8 planetas (y plutón), con sus respectivas lunas, el son, y el cinturón de asteroides.*
@@ -61,7 +60,7 @@ Todos los astros menos los anillos y órbitas serán de esta clase.
 
 * Para el sistema solar normal, que no es juego, se agrega una nave con THREE.ThirdPersonControls para que pueda explorar el sistema solar.
 
-* Para el minijuego, primero se tiene que hacer un mudo fisico, en donde los objetos puedan interactuar con otros objetos. Para eso se crea una funcion que utiliza CANNON.World(), y que crea un cuerpo fisico a cada planeta y asteroide, con una masa de 1 y lo añade a la escena. 
+* Para el minijuego, primero se tiene que hacer un mudo fisico, en donde los objetos puedan interactuar con otros objetos. Para eso se crea una funcion que utiliza CANNON.World(), y que crea un cuerpo fisico a cada planeta y asteroide, con una masa de 1 y lo añade a la escena.  Como se vio en Physics.js
 
 * Despues se agrega una nave con THREE.PlayerControls y un cuerpo fisico, utilizando CANNON para el manejo de los colliders y su cuerpo fisico. El jugador tiene lasers que matan al enemigo, y su comportamiento esta definido en PlayerControls.js 
 
