@@ -15,7 +15,6 @@ var bump_intensity = 0.2; //0.2 recommended
 //Texture normal intensity
 var normal_intensity = new THREE.Vector2(1,1); //(1,1) recommended
 
-
 var backgroundUrl = "../../images/2k_stars_milky_way.jpg";
 //All textures
 var Textures =
@@ -39,6 +38,11 @@ var Textures =
     //The Moon's bump map is used as texture for Generic moons
     Gm: new THREE.TextureLoader().load("../../images/moonbump1k.jpg"),
     Player: new THREE.TextureLoader().load("../../models/ship/ship-mono.png"),
+    Enemy0: new THREE.TextureLoader().load("../../models/alien/alien-1-solid.png"),
+    Enemy1: new THREE.TextureLoader().load("../../models/alien/alien-1.png"),
+    Enemy2: new THREE.TextureLoader().load("../../models/alien/alien-2-solid.png"),
+    Enemy3: new THREE.TextureLoader().load("../../models/alien/alien-3-solid.png"),
+    Enemy4: new THREE.TextureLoader().load("../../models/alien/alien-4-solid.png"),
 }
 
 //Noise used for the sun
@@ -77,7 +81,7 @@ var Normals =
     Ab_b: new THREE.TextureLoader().load("../../models/asteroid/asteroid_b-normal.png"),
     Ab_c: new THREE.TextureLoader().load("../../models/asteroid/asteroid_c-normal.png"),
     Player: new THREE.TextureLoader().load("../../models/ship/ship-normal.png"),
-
+    Enemy: new THREE.TextureLoader().load("../../models/alien/alien-normal.png"),
 }
 
 //All materials
@@ -160,6 +164,7 @@ var Obj =
     Ab_b: "../../models/asteroid/asteroid_b.obj",
     Ab_c: "../../models/asteroid/asteroid_c.obj",
     Player: "../../models/ship/ship.obj",
+    Enemy: "../../models/alien/alien.obj",
 }
 
 //Generic Objects for asteroids, the ship, and aliens
@@ -169,5 +174,10 @@ var Objects =
     Ab_a: loadOBJ(Obj['Ab_a'],Textures['Ab_a'],Normals['Ab_a']),
     Ab_b: loadOBJ(Obj['Ab_b'],Textures['Ab_b'],Normals['Ab_b']),
     Ab_c: loadOBJ(Obj['Ab_c'],Textures['Ab_c'],Normals['Ab_c']),
-    Player: loadOBJ(Obj['Player'],Textures['Player'],Normals['Player']),
+    Player: loadOBJ(Obj['Player'],Textures['Player'],Normals['Enemy']),
+    Enemy0: loadOBJ(Obj['Enemy'],Textures['Enemy0'],Normals['Enemy']),
+    Enemy1: loadOBJ(Obj['Enemy'],Textures['Enemy1'],Normals['Enemy']),
+    Enemy2: loadOBJ(Obj['Enemy'],Textures['Enemy2'],Normals['Enemy']),
+    Enemy3: loadOBJ(Obj['Enemy'],Textures['Enemy3'],Normals['Enemy']),
+    Enemy4: loadOBJ(Obj['Enemy'],Textures['Enemy4'],Normals['Enemy']),
 }

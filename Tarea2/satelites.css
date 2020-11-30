@@ -3,3 +3,47 @@ button
     position: relative;
     top: 630px;
 }
+
+table
+{
+    position: relative;
+    top: 630px;
+    color: black;
+    width: 800px;
+    text-align: center;
+    border-spacing: 12px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+td.hit0
+{
+    height: 40px;
+    background-color: rgb(46, 226, 46);
+}
+
+td.hit1
+{
+    height: 40px;
+    background-color: rgb(226, 214, 46);
+}
+
+td.hit2
+{
+    height: 40px;
+    background-color: rgb(189, 17, 17);
+}
+
+td.hit3
+{
+    height: 40px;
+    background-color: rgb(54, 54, 54);
+}
+
+#GameOver
+{
+    position:absolute;
+	bottom:20px;
+	left:20px;
+	color:#b8c3f5;
+}

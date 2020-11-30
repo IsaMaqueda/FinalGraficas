@@ -7,6 +7,7 @@
 	<link rel="stylesheet" href="../libs/jquery-ui/jquery-ui.css" />
 	<link rel="stylesheet" href="../css/main.css" />
 	<link rel="stylesheet" href="../css/threejsscene.css" />
+	<link rel="stylesheet" href="../css/threejsshadows.css" />
 	<link rel="stylesheet" href="satelites.css" />
 
 	<script src="../libs/jquery-3.4.1/jquery-3.4.1.min.js"></script>
@@ -93,7 +94,7 @@
 		$(document).ready(
 			function ()
 			{
-
+				document.getElementById("GameOver").style.visibility = 'hidden';
 				$("#slider").slider({ min: 0.1, max: 2, value: 1, step: 0.01, animate: false });
 
 				let canvas = document.getElementById("webglcanvas");
@@ -114,29 +115,30 @@
 
 	<div id="container">
 		<canvas id="webglcanvas" width=800 height=600></canvas>
-		<div id="prompt">
-			Drag the mouse to rotate the scene<br>Drag the slider to scale.
+		<div id="GameOver">
+			Game Over
 		</div>
 	</div>
-	<div id="slider"></div>
 	<div>
 		<button type="button" onclick="switchAmbientLight()">Switch Ambient light</button>
 		<button type="button" onclick="switchRotation()">Switch Rotation</button>
 		<button type="button" onclick="switchTranslation()">Switch Translation</button>
 		<button type="button" onclick="flipCam()">Flip Camera</button>
 	</div>
-	<br>
 	<div>
-		<button type="button" onclick="updateCameraTarget(0)">Su</button>
-		<button type="button" onclick="updateCameraTarget(1)">Me</button>
-		<button type="button" onclick="updateCameraTarget(2)">Ve</button>
-		<button type="button" onclick="updateCameraTarget(3)">Ea</button>
-		<button type="button" onclick="updateCameraTarget(4)">Ma</button>
-		<button type="button" onclick="updateCameraTarget(5)">Ju</button>
-		<button type="button" onclick="updateCameraTarget(6)">Sa</button>
-		<button type="button" onclick="updateCameraTarget(7)">Ur</button>
-		<button type="button" onclick="updateCameraTarget(8)">Ne</button>
-		<button type="button" onclick="updateCameraTarget(9)">Pl</button>
+		<table>
+			<tr>
+		<td id='Me_t' class="hit0">Me</td>
+		<td id='Ve_t' class="hit0">Ve</td>
+		<td id='Ea_t' class="hit0">Ea</td>
+		<td id='Ma_t' class="hit0">Ma</td>
+		<td id='Ju_t' class="hit0">Ju</td>
+		<td id='Sa_t' class="hit0">Sa</td>
+		<td id='Ur_t' class="hit0">Ur</td>
+		<td id='Ne_t' class="hit0">Ne</td>
+		<td id='Pl_t' class="hit0">Pl</td>
+	</tr>
+	</table>
 	</div>
 </body>
 

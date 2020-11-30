@@ -380,7 +380,7 @@ THREE.PlayerControls = function ( camera, player, domElement ) {
         planetArray.forEach(planet =>
         {
             //console.log(planet.sphere.position)
-            console.log()
+            console.log();
             /*var dst = math.distance(Object.values(planet.sphere.position),Object.values(player.position));
             if(dst - 0.4 <= planet.radius)
             {

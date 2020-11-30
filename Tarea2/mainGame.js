@@ -9,6 +9,8 @@ let renderer = null,
     cameraTargetPlanet = null, //Planet camera points at
     ambientLight = null,
     playerMode = false,
+    gameIsOn = true,
+    total_enemies = 10,
     global_rotation = true, //Boolean for global rotations
     global_translation = true, //Boolean for global transalations
     SolarSystem = null; //The sun, asteroid belt, and orbits parent group
@@ -19,6 +21,7 @@ asteroids = ['Ab_a', 'Ab_b', 'Ab_c']
 //Arrays that will contain SpaceSpheres representing planets and asteroids
 planetArray = [];
 asteroidArray = [];
+Enemies = [];
 
 //Time vaiables for rotations
 let duration = 100; // ms
@@ -120,6 +123,8 @@ function flipCam()
 //Runs animations
 function run()
 {
+    if(gameIsOn)
+    { 
     requestAnimationFrame(function () { run(); });
 
     //Update the OrbitControls
@@ -130,6 +135,7 @@ function run()
     renderer.render(scene, camera);
 
     animate();
+    }
 }
 
 //The SpaceSphere class
@@ -414,6 +420,13 @@ function makeSunlight()
     sunlight.intensity = solar_intensity * 2;
     sunlight.decay = 2;
     sunlight.castShadow = true;
+
+    //for the shadows 
+    sunlight.shadow.mapSize.width = 4096/1.5; // default
+    sunlight.shadow.mapSize.height = 4096/1.5; // default
+    sunlight.shadow.camera.near = 0.89/4; // default
+    sunlight.shadow.camera.far = 500; // default
+
     return sunlight;
 }
 
@@ -510,6 +523,7 @@ function initPhysicalWorld()
     // add physical bodies
     planetArray.forEach(planet => {
         planet.body = addPhysicalBody(planet.sphere, {mass: 1});
+        planet.body.tag = 'planet';
     });
 }
 
@@ -529,7 +543,12 @@ function addPhysicalBody(mesh, bodyOptions)
         if(mesh.name == 'vehicle_playerShip')
         {
             box = new THREE.Box3();
-            box.setFromObject(mesh.parent)
+            let newMesh = mesh.parent.clone();
+            console.log(mesh,"#",newMesh)
+            newMesh.scale.add(new THREE.Vector3(-0.001,-0.001,-0.001))
+            box.setFromObject(newMesh);
+            var yyy = new THREE.BoxHelper(newMesh,0xff0000)
+            scene.add(yyy)
         }
         shape = new CANNON.Box(new CANNON.Vec3(
             (box.max.x - box.min.x) / 2,
@@ -549,7 +568,7 @@ function addPhysicalBody(mesh, bodyOptions)
     body.mesh = mesh;
     // body.name = "Cuerpo fisico";
     world.addBody(body);
-    var bxx = new THREE.BoxHelper(mesh,0xffff00)
+    var bxx = new THREE.BoxHelper(mesh,0x00ffff)
     scene.add(bxx)
     return body;
 }
@@ -558,8 +577,36 @@ function updatePhysics(delta) {
     world.step(delta);
 
     world.contacts.forEach(function (contact) {
-        //if(contact.bj.mesh.name == 'vehicle_playerShip')
-        console.log('lol')
+        if(contact.bj.tag == 'enemy')
+        {
+            if(contact.bi.tag == 'planet')
+                {
+                    let plnt = document.getElementById(contact.bi.mesh.name+"_t").className;
+                    console.log(plnt)
+                    switch (plnt) {
+                        case 'hit0':
+                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit1'
+                            break;
+                        case 'hit1':
+                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit2'
+                            break;
+                        case 'hit2':
+                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit3'
+                            scene.remove(contact.bi.mesh.parent);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+        }
+        if(contact.bj.tag == 'player')
+        {
+            if(contact.bi.tag == 'planet')
+                {
+                    document.getElementById("GameOver").style.visibility = 'visible';
+                    gameEnd();
+                }
+        }
     });
 };
 
@@ -584,7 +631,7 @@ async function addPlayer()
     player.children[0].geometry.boundingSphere = null;
     player.children[0].geometry.boundingBox = null;
     playerbody = addPhysicalBody(player.children[0], {mass: 1});
-    console.log(playerbody)
+    playerbody.tag = 'player';
     // register for collide events
     playerbody.addEventListener('collide', function (e) {
         //console.log(e);
@@ -595,6 +642,62 @@ async function addPlayer()
     //scene.add(bxx)
 }
 
+async function addEnemies()
+{
+    for (let index = 0; index < total_enemies; index++)
+    {
+    let enemy = null
+    let enemy_type = Math.round(1 + Math.random() * 9);
+    enemy = await Objects['Enemy'+10%enemy_type];
+    switch(10%enemy_type)
+    {
+        case 0:
+            enemy.speed = 0.2/10;
+            break;
+        case 1:
+            enemy.speed = 0.2/8;
+            break;
+        case 2:
+            enemy.speed = 0.2/6;
+            break;
+        case 3:
+            enemy.speed = 0.2/5;
+            break;
+        case 4:
+            enemy.speed = 0.2/5;
+            break;
+    }
+    enemy.scale.set(0.02, 0.02, 0.02);
+    enemy.position.y = (Math.random() * 20) -10
+    let r = (SolarDistances['Ma'] + Math.random() * SolarDistances['Sa']) * au_to_er;
+    let t = radians(Math.random() * 360)
+    enemy.position.z = r * Math.cos(t)
+    enemy.position.x = r * Math.sin(t)
+    enemy.children[0].receiveShadow = true;
+    enemy.children[0].castShadow = true;
+    enemy.lookAt(planetArray[2 + Math.random()*7].sphere.position)
+    console.log(enemy.position)
+    Enemies.push(enemy)
+    scene.add(enemy)
+}
+    //player.children[0].geometry.rotateY(Math.PI)
+    /*player.children[0].geometry.boundingSphere = null;
+    player.children[0].geometry.boundingBox = null;
+    playerbody = addPhysicalBody(player.children[0], {mass: 1});
+    playerbody.tag = 'player';
+    // register for collide events
+    playerbody.addEventListener('collide', function (e) {
+        //console.log(e);
+        //console.log('Collision!');
+    });*/
+    
+}
+
+function gameEnd()
+{
+    gameIsOn = !gameIsOn;
+}
+
 function createScene(canvas)
 {
     // Create the Three.js renderer and attach it to our canvas
@@ -603,6 +706,9 @@ function createScene(canvas)
 
     // Set the viewport size
     renderer.setSize(canvas.width, canvas.height);
+
+    // Set shadow map
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 
     // Create a new Three.js scene
     scene = new THREE.Scene();
@@ -669,10 +775,14 @@ function createScene(canvas)
     //updateCameraTarget(0);
     //Start the camera close to Pluto
     //camera.position.z = SolarDistances['Pl'] * au_to_er + 20;
-    //Stop translations for easier startup loading
+    //Stop translations and rotations for easier startup loading
     switchTranslation();
+    switchRotation();
+    //Start physical world for collisions
     initPhysicalWorld();
-    console.log(planetArray[3].parent.rotation)
     addPlayer();
-    //addEnemies();
+    addEnemies();
+    //Start translations and rotations
+    switchTranslation();
+    switchRotation();
 }
