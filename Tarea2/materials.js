@@ -138,7 +138,8 @@ var Materials =
         bumpMap: Bumps['Pl'],
         bumpScale: bump_intensity,
     }),
-    Gm: new THREE.MeshPhongMaterial({map: Textures['Gm'],})
+    Gm: new THREE.MeshPhongMaterial({map: Textures['Gm']}),
+    lzr: new THREE.MeshBasicMaterial({opacity: 0.9, transparent: true}),
 }
 
 //Generic Geometries for moons
@@ -146,6 +147,7 @@ var Geometries =
 {
     //Generic Moon Geometry
     Gm: new THREE.SphereGeometry(Radii['Mo'],sphere_detail,sphere_detail),
+    lzr: new THREE.SphereGeometry(Radii['Mo']/6, 8, 6)
 }
 
 //Obj files for asteroids, the ship, and aliens

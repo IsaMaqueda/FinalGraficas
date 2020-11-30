@@ -137,6 +137,7 @@ function adjustSizes()
     {
         Ab: new THREE.SphereGeometry(Radii['Ab'], sphere_detail, sphere_detail),
         Gm: new THREE.SphereGeometry(Radii['Mo'], sphere_detail, sphere_detail),
+        lzr: new THREE.SphereGeometry(Radii['Mo']/6, 5, 3),
     }
 
 }
