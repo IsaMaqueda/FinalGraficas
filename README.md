@@ -1,7 +1,7 @@
 # FinalGraficas
 
 ### Isabel Maqueda Rolon A01652906
-### Andres Campos Tams A01
+### Andres Campos Tams A01024385
 
 ## El proyecto final propuesto fue el siguiente: continuando el Sistema Solar de la Tarea 2, añadir valores reales al sistema solar, al igual que crear un minijuego. 
 
