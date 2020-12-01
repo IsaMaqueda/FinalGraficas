@@ -15,7 +15,7 @@
 * *Cada elemento tiene que tener su propio materia, con texturas, normales, y bump maps (de existir).*
 * *Shaders para cada planeta*
 * *Nave espacial que siga a la camara*
-* *Minijuego: en donde la nave espacial tenga que esquivar asteroides, y cuando no pueda, pierda *
+* *Minijuego: en donde la nave espacial tenga que esquivar asteroides, y cuando no pueda, pierda*
 * *Menu*
 
 
