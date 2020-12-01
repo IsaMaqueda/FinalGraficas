@@ -111,7 +111,7 @@
 
 </head>
 
-<body>
+<body id='gamebg'>
 
 	<div id="container">
 		<canvas id="webglcanvas" width=800 height=600></canvas>
@@ -120,10 +120,12 @@
 		</div>
 	</div>
 	<div>
-		<button type="button" onclick="switchAmbientLight()">Switch Ambient light</button>
-		<button type="button" onclick="switchRotation()">Switch Rotation</button>
-		<button type="button" onclick="switchTranslation()">Switch Translation</button>
-		<button type="button" onclick="flipCam()">Flip Camera</button>
+		<table>
+			<tr>
+				<td id="n_enemies"></td>
+				<td id="targets"></td>
+			</tr>
+		</table>
 	</div>
 	<div>
 		<table>

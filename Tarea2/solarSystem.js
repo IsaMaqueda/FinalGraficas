@@ -183,7 +183,7 @@ class SpaceSphere
         satelite.parent.rotation.y += radians(Math.random() * 360);
     }
 
-    //Asigns the orbit to teh object
+    //Asigns the orbit to the object
     makePlanetOrbit()
     {
         this.orbit = makeOrbit(this.orbitMajor, this.orbitMinor );
@@ -522,8 +522,7 @@ function switchTranslation()
 }
 
 async function addPlayer()
-{
-    
+{   
     player = await Objects['Player'];
     player.scale.set(0.004, 0.004, 0.004);
     player.position.z = SolarDistances['Ea'] * au_to_er;

@@ -10,7 +10,9 @@ let renderer = null,
     ambientLight = null,
     playerMode = false,
     gameIsOn = true,
+    gameOver = false,
     total_enemies = 10,
+    enemy_dir = new THREE.Vector3(),
     global_rotation = true, //Boolean for global rotations
     global_translation = true, //Boolean for global transalations
     SolarSystem = null; //The sun, asteroid belt, and orbits parent group
@@ -22,6 +24,7 @@ asteroids = ['Ab_a', 'Ab_b', 'Ab_c']
 planetArray = [];
 asteroidArray = [];
 Enemies = [];
+Targets = [];
 
 //Time vaiables for rotations
 let duration = 100; // ms
@@ -54,6 +57,14 @@ function animate()
             asteroid.parent.rotation.y += (angle / (asteroid.year * 24)) * yearSpeed;
         if (global_rotation)
             asteroid.sphere.rotation.y += (angle / (asteroid.day * 24)) * daySpeed;
+    });
+
+    Enemies.forEach(alien => {
+        let target_b_p = alien.target_ss.body.position
+        alien.lookAt(target_b_p.x,target_b_p.y,target_b_p.z)
+        alien.getWorldDirection(enemy_dir)
+        alien.position.add(enemy_dir.multiplyScalar(alien.speed))
+        alien.body.position.copy(alien.position)
     });
 
     updatePhysics(fract);
@@ -124,7 +135,7 @@ function flipCam()
 function run()
 {
     if(gameIsOn)
-    { 
+    {
     requestAnimationFrame(function () { run(); });
 
     //Update the OrbitControls
@@ -135,6 +146,11 @@ function run()
     renderer.render(scene, camera);
 
     animate();
+    if(gameOver)
+    {
+        document.getElementById("GameOver").style.visibility = 'visible';
+        gameSwitch();
+    }
     }
 }
 
@@ -524,7 +540,11 @@ function initPhysicalWorld()
     planetArray.forEach(planet => {
         planet.body = addPhysicalBody(planet.sphere, {mass: 1});
         planet.body.tag = 'planet';
+        planet.body.ss = planet;
     });
+
+    //Overrite sun
+    planetArray[0].body.tag = 'sun';
 }
 
 function addPhysicalBody(mesh, bodyOptions)
@@ -540,15 +560,12 @@ function addPhysicalBody(mesh, bodyOptions)
     else {
         mesh.geometry.computeBoundingBox();
         var box = mesh.geometry.boundingBox;
-        if(mesh.name == 'vehicle_playerShip')
+        if(mesh.name == 'vehicle_playerShip' || mesh.name == 'vehicle_enemyShip')
         {
             box = new THREE.Box3();
             let newMesh = mesh.parent.clone();
-            console.log(mesh,"#",newMesh)
             newMesh.scale.add(new THREE.Vector3(-0.001,-0.001,-0.001))
             box.setFromObject(newMesh);
-            var yyy = new THREE.BoxHelper(newMesh,0xff0000)
-            scene.add(yyy)
         }
         shape = new CANNON.Box(new CANNON.Vec3(
             (box.max.x - box.min.x) / 2,
@@ -568,21 +585,21 @@ function addPhysicalBody(mesh, bodyOptions)
     body.mesh = mesh;
     // body.name = "Cuerpo fisico";
     world.addBody(body);
-    var bxx = new THREE.BoxHelper(mesh,0x00ffff)
-    scene.add(bxx)
     return body;
 }
 
 function updatePhysics(delta) {
     world.step(delta);
 
-    world.contacts.forEach(function (contact) {
+    world.contacts.forEach(function (contact) 
+    {
+        console.log(contact)
         if(contact.bj.tag == 'enemy')
         {
+            console.log(contact.bi.tag)
             if(contact.bi.tag == 'planet')
                 {
                     let plnt = document.getElementById(contact.bi.mesh.name+"_t").className;
-                    console.log(plnt)
                     switch (plnt) {
                         case 'hit0':
                             document.getElementById(contact.bi.mesh.name+"_t").className = 'hit1'
@@ -592,21 +609,64 @@ function updatePhysics(delta) {
                             break;
                         case 'hit2':
                             document.getElementById(contact.bi.mesh.name+"_t").className = 'hit3'
+                            planetArray.splice(planetArray.indexOf(contact.bi.ss),1);
+                            Enemies.forEach(alien => {
+                                if(alien.target_ss == contact.bi.ss)
+                                    alien.target_ss = planetArray[1 + Math.trunc(Math.random()*planetArray.length-1)];
+                            });
                             scene.remove(contact.bi.mesh.parent);
+                            world.removeBody(contact.bi.mesh.parent.body);
                             break;
                         default:
                             break;
                     }
+                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
+                    world.removeBody(contact.bj.mesh.parent.body);
+                    scene.remove(contact.bj.mesh.parent);
+                    if(Enemies.length == 0)
+                    {
+                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped, at a cost';
+                        gameOver = true;
+                    }
                 }
+                if(contact.bi.tag == 'sun')
+                {
+                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
+                    world.removeBody(contact.bj.mesh.parent.body);
+                    scene.remove(contact.bj.mesh.parent);
+                    if(Enemies.length == 0)
+                    {
+                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped, at a cost';
+                        gameOver = true;
+                    }
+                }
+                //Enemy is hit by laser
+                if(contact.bi.tag == 'lzr')
+                {
+                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
+                    world.removeBody(contact.bj.mesh.parent.body);
+                    scene.remove(contact.bj.mesh.parent);
+                    if(Enemies.length == 0)
+                    {
+                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped';
+                        gameOver = true;
+                    }
+                }
+                if(contact.bi.tag == 'player')
+                {
+                    gameOver = true;
+                }
+                document.getElementById('n_enemies').innerHTML = 'Enemies: '+Enemies.length;
         }
+        //Player collides with planet
         if(contact.bj.tag == 'player')
         {
             if(contact.bi.tag == 'planet')
                 {
-                    document.getElementById("GameOver").style.visibility = 'visible';
-                    gameEnd();
+                    gameOver = true;
                 }
         }
+        
     });
 };
 
@@ -618,7 +678,6 @@ async function addPlayer()
     player.position.y = 1 + Radii['Ea'];
     player.children[0].receiveShadow = true;
     player.children[0].castShadow = true;
-    console.log(player)
     player.children[0].geometry.rotateY(Math.PI) 
     playerMode = !playerMode;
     camera.position.z = player.position.z + 2.5;
@@ -637,9 +696,6 @@ async function addPlayer()
         //console.log(e);
         //console.log('Collision!');
     });
-
-    var bxx = new THREE.BoxHelper(playerbody.mesh,0xffff00)
-    //scene.add(bxx)
 }
 
 async function addEnemies()
@@ -668,32 +724,30 @@ async function addEnemies()
             break;
     }
     enemy.scale.set(0.02, 0.02, 0.02);
-    enemy.position.y = (Math.random() * 20) -10
+    if(index%2 == 0)
+    enemy.position.y = (Math.random() * -20) -2
+    else
+    enemy.position.y = (Math.random() * 20) +2
     let r = (SolarDistances['Ma'] + Math.random() * SolarDistances['Sa']) * au_to_er;
     let t = radians(Math.random() * 360)
     enemy.position.z = r * Math.cos(t)
     enemy.position.x = r * Math.sin(t)
     enemy.children[0].receiveShadow = true;
     enemy.children[0].castShadow = true;
-    enemy.lookAt(planetArray[2 + Math.random()*7].sphere.position)
-    console.log(enemy.position)
+    enemy.target_ss = planetArray[1 + Math.trunc(Math.random()*planetArray.length -1)];
+    Targets.push(enemy.target_ss.sphere.name)
+    enemy.lookAt(enemy.target_ss.body.position)
+    enemy.body = addPhysicalBody(enemy.children[0], {mass: 1});
+    enemy.body.tag = 'enemy';
+    enemy.body.addEventListener('collide', function (e) {});
     Enemies.push(enemy)
     scene.add(enemy)
 }
-    //player.children[0].geometry.rotateY(Math.PI)
-    /*player.children[0].geometry.boundingSphere = null;
-    player.children[0].geometry.boundingBox = null;
-    playerbody = addPhysicalBody(player.children[0], {mass: 1});
-    playerbody.tag = 'player';
-    // register for collide events
-    playerbody.addEventListener('collide', function (e) {
-        //console.log(e);
-        //console.log('Collision!');
-    });*/
-    
+document.getElementById('n_enemies').innerHTML = 'Enemies: '+Enemies.length;
+document.getElementById('targets').innerHTML = 'Targets: '+Targets;
 }
 
-function gameEnd()
+function gameSwitch()
 {
     gameIsOn = !gameIsOn;
 }

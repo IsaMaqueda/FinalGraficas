@@ -342,16 +342,16 @@ THREE.PlayerControls = function ( camera, player, domElement ) {
             let laser = new THREE.Mesh(Geometries['lzr'], Materials['lzr']);
             laser.position.copy(this.player.position)
             laser.rotation.y = (this.player.rotation.y)
-            console.log(player.rotation.y,"ZZZZ")
             laser.rotateX(Math.PI/2)
             laser.rotateY(Math.random()*Math.PI/4)
             laser.position.x -= 0.5 * Math.sin( this.player.rotation.y );
             laser.position.z -= 0.5 * Math.cos( this.player.rotation.y );
             laser.scale.set(1,5,1);
             scene.add(laser);
-            Lasers.push({mesh: laser, time: Date.now(), body: addPhysicalBody(laser, {mass: 1, name: 'lzr'})});
-            console.log(laser);
-            await new Promise(r => setTimeout(r,shootTimeout*3));
+            let lzrbody = addPhysicalBody(laser, {mass: 1});
+            lzrbody.tag = 'lzr';
+            Lasers.push({mesh: laser, time: Date.now(), body: lzrbody});
+            await new Promise(r => setTimeout(r,shootTimeout*5));
             canShoot = ! canShoot;
         }
     }
@@ -359,12 +359,11 @@ THREE.PlayerControls = function ( camera, player, domElement ) {
     this.laserControl = async function ()
     {
         Lasers.forEach(lzr => {
-            if(lzr['time'] + 1000 < Date.now())
+            if(lzr['time'] + 2500 < Date.now())
             {
                 scene.remove(lzr['mesh'])
                 Lasers.splice(Lasers.indexOf(lzr),1)
                 world.removeBody(lzr['body']);
-                console.log(Lasers)
             }
             else
             {
@@ -380,7 +379,6 @@ THREE.PlayerControls = function ( camera, player, domElement ) {
         planetArray.forEach(planet =>
         {
             //console.log(planet.sphere.position)
-            console.log();
             /*var dst = math.distance(Object.values(planet.sphere.position),Object.values(player.position));
             if(dst - 0.4 <= planet.radius)
             {

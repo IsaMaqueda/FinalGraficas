@@ -14,10 +14,17 @@ table
     border-spacing: 12px;
     font-weight: bold;
     font-size: 25px;
+    background-color: rgb(59, 59, 59);
+}
+
+td
+{
+    color: whitesmoke;
 }
 
 td.hit0
 {
+    color: black;
     height: 40px;
     background-color: rgb(46, 226, 46);
 }
@@ -46,4 +53,9 @@ td.hit3
 	bottom:20px;
 	left:20px;
 	color:#b8c3f5;
+}
+
+#gamebg
+{
+    background-color: rgb(48, 48, 48);
 }
