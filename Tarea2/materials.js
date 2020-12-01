@@ -15,6 +15,7 @@ var bump_intensity = 0.2; //0.2 recommended
 //Texture normal intensity
 var normal_intensity = new THREE.Vector2(1,1); //(1,1) recommended
 
+//Background texture
 var backgroundUrl = "../../images/2k_stars_milky_way.jpg";
 //All textures
 var Textures =
@@ -167,7 +168,7 @@ var Obj =
     Enemy: "../../models/alien/alien.obj",
 }
 
-//Generic Objects for asteroids, the ship, and aliens
+// Objects for asteroids, the ship, and aliens
 var Objects =
 {
     //Generic Asteroid objects

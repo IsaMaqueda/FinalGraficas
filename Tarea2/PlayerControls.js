@@ -1,3 +1,4 @@
+//source: https://github.com/PiusNyakoojo/PlayerControls
 THREE.PlayerControls = function ( camera, player, domElement ) {
 
 	this.camera = camera;
@@ -316,6 +317,7 @@ THREE.PlayerControls = function ( camera, player, domElement ) {
 
         }
         
+        //Shoot a laser
         if (keyState[16] || keyState[189]) {
             this.shootLaser();
         }

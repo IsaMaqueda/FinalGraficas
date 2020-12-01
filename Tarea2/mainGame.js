@@ -2,17 +2,17 @@ let renderer = null,
     controls = null,
     scene = null,
     world = null,
-    wroldpos = new THREE.Vector3(),
+    worldpos = new THREE.Vector3(),
     camera = null,
     player = null,
-    playerbody = null,
+    playerbody = null, //Player Cannon body
     cameraTargetPlanet = null, //Planet camera points at
     ambientLight = null,
     playerMode = false,
     gameIsOn = true,
     gameOver = false,
     total_enemies = 10,
-    enemy_dir = new THREE.Vector3(),
+    enemy_dir = new THREE.Vector3(), //Aides with assigning enemy direction
     global_rotation = true, //Boolean for global rotations
     global_translation = true, //Boolean for global transalations
     SolarSystem = null; //The sun, asteroid belt, and orbits parent group
@@ -23,6 +23,7 @@ asteroids = ['Ab_a', 'Ab_b', 'Ab_c']
 //Arrays that will contain SpaceSpheres representing planets and asteroids
 planetArray = [];
 asteroidArray = [];
+//Arrays that will contain Enemies and their target's code
 Enemies = [];
 Targets = [];
 
@@ -38,7 +39,7 @@ function animate()
     let fract = deltat / duration;
     //Each angle is equivalent to 1 Earth hour approximately
     let angle = Math.PI * 2 * fract;
-    
+
     //Move the sun shader
     sunShader(fract);
     //Check current camera focus
@@ -59,14 +60,17 @@ function animate()
             asteroid.sphere.rotation.y += (angle / (asteroid.day * 24)) * daySpeed;
     });
 
-    Enemies.forEach(alien => {
+    //Move aliens to their target
+    Enemies.forEach(alien =>
+    {
         let target_b_p = alien.target_ss.body.position
-        alien.lookAt(target_b_p.x,target_b_p.y,target_b_p.z)
+        alien.lookAt(target_b_p.x, target_b_p.y, target_b_p.z)
         alien.getWorldDirection(enemy_dir)
         alien.position.add(enemy_dir.multiplyScalar(alien.speed))
         alien.body.position.copy(alien.position)
     });
 
+    //Update all physics except for enemies and player
     updatePhysics(fract);
 }
 
@@ -85,8 +89,9 @@ function rotatePlanetsAndSatelites(spaceSphere, angle)
     if (global_translation)
     {
         spaceSphere.parent.rotation.y += (angle / (spaceSphere.year * 24)) * yearSpeed;
-        spaceSphere.sphere.getWorldPosition(wroldpos)
-        spaceSphere.body.position.copy(wroldpos);
+        //Move the collider
+        spaceSphere.sphere.getWorldPosition(worldpos)
+        spaceSphere.body.position.copy(worldpos);
     }
     if (global_rotation)
         spaceSphere.sphere.rotation.y += (angle / (spaceSphere.day * 24)) * daySpeed;
@@ -104,53 +109,28 @@ function rotatePlanetsAndSatelites(spaceSphere, angle)
     }
 }
 
-//Changes the target if necessary
-// Recieves a SpaceSphere object as input
-function updateOrbitTarget(target)
-{
-    //Adds the camera to the planet's group
-    target.parent.add(camera)
-    //controls.target = (target.parent.localToWorld(target.sphere.position))
-}
-
-//Updates which planet the camera rotates with
-// Recieves a number as input
-function updateCameraTarget(code_n)
-{
-    //changes the target variable
-    cameraTargetPlanet = code_n;
-    //Updates the camera position
-    camera.position.z = planetArray[code_n].distance + 20;
-    camera.position.y = planetArray[code_n].sphere.position.y;
-    camera.position.x = planetArray[code_n].sphere.position.x;
-}
-
-//Flips the camera on z axis
-function flipCam()
-{
-    camera.position.z *= -1;
-}
-
 //Runs animations
 function run()
 {
-    if(gameIsOn)
+    //If the game is on
+    if (gameIsOn)
     {
-    requestAnimationFrame(function () { run(); });
+        requestAnimationFrame(function () { run(); });
 
-    //Update the OrbitControls
-    if(controls != null)
-        controls.update();
+        //Update the player
+        if (controls != null)
+            controls.update();
 
-    // Render the scene
-    renderer.render(scene, camera);
+        // Render the scene
+        renderer.render(scene, camera);
 
-    animate();
-    if(gameOver)
-    {
-        document.getElementById("GameOver").style.visibility = 'visible';
-        gameSwitch();
-    }
+        animate();
+        //Game was lost
+        if (gameOver)
+        {
+            document.getElementById("GameOver").style.visibility = 'visible';
+            gameSwitch();
+        }
     }
 }
 
@@ -292,11 +272,11 @@ async function addAsteroids(n)
         //Get asteroid model and extract geometry and material
         let asteroid_geo = null;
         let asteroid_mat = null;
-        let asteroid_type = Math.round(Math.random() *2);
+        let asteroid_type = Math.round(Math.random() * 2);
         let asteroidModel = await Objects[asteroids[asteroid_type]]
-        asteroidModel.traverse( function ( child )
+        asteroidModel.traverse(function (child)
         {
-            if ( child.isMesh )
+            if (child.isMesh)
             {
                 asteroid_geo = child.geometry;
                 asteroid_mat = child.material;
@@ -317,7 +297,7 @@ async function addAsteroids(n)
         asteroid.sphere.castShadow = true;
         asteroid.sphere.recieveShadow = true;
         //Make the asteroid color darker depending on the type
-        switch(asteroid_type)
+        switch (asteroid_type)
         {
             case 0:
                 asteroid.sphere.material.color.setHSL(0, 0, Math.random() * 0.35 + 0.1)
@@ -438,9 +418,9 @@ function makeSunlight()
     sunlight.castShadow = true;
 
     //for the shadows 
-    sunlight.shadow.mapSize.width = 4096/1.5; // default
-    sunlight.shadow.mapSize.height = 4096/1.5; // default
-    sunlight.shadow.camera.near = 0.89/4; // default
+    sunlight.shadow.mapSize.width = 4096 / 1.5; // default/1.5
+    sunlight.shadow.mapSize.height = 4096 / 1.5; // default/1.5
+    sunlight.shadow.camera.near = 0.89 / 4; // default/4
     sunlight.shadow.camera.far = 500; // default
 
     return sunlight;
@@ -460,13 +440,14 @@ function makePlanet(code)
         Tilts[code],
         returnSphere(Radii[code]),
         Materials[code]);
-    
+
     //Randomly rotates the planet around the sun
     planet.parent.rotation.y = radians(Math.random() * 360);
 
     //Add orbital tilt to the planet parent
     planet.parent.rotateZ(radians(orbitTilts[code]))
 
+    //Name the sphere as the planet code
     planet.sphere.name = code;
 
     //Add Satelites and rings if applicable
@@ -488,7 +469,7 @@ function makePlanet(code)
             moon.sphere.castShadow = true;
             //Add the Moon to Earth
             planet.addSatelite(moon);
-            //Start Earth at a static position
+            //Start Earth at a static position, under player
             planet.parent.rotation.x = 0;
             planet.parent.rotation.y = 0;
             planet.parent.rotation.z = 0;
@@ -532,39 +513,46 @@ function switchTranslation()
     global_translation = !global_translation;
 }
 
+//Start the physical cannon world
 function initPhysicalWorld()
 {
     world = new CANNON.World();
 
-    // add physical bodies
-    planetArray.forEach(planet => {
-        planet.body = addPhysicalBody(planet.sphere, {mass: 1});
+    // Add physical bodies for planets
+    planetArray.forEach(planet =>
+    {
+        planet.body = addPhysicalBody(planet.sphere, { mass: 1 });
         planet.body.tag = 'planet';
         planet.body.ss = planet;
     });
 
-    //Overrite sun
+    //Overrite sun as its own entity
     planetArray[0].body.tag = 'sun';
 }
 
+//Add physical body to space
 function addPhysicalBody(mesh, bodyOptions)
 {
     var shape;
     // create a Sphere shape for spheres
     // a Box shape otherwise
     if (mesh.geometry.type === 'SphereGeometry' ||
-    mesh.geometry.type === 'SphereBufferGeometry') {
+        mesh.geometry.type === 'SphereBufferGeometry')
+    {
         mesh.geometry.computeBoundingSphere();
         shape = new CANNON.Sphere(mesh.geometry.boundingSphere.radius);
     }
-    else {
+    else
+    {
         mesh.geometry.computeBoundingBox();
         var box = mesh.geometry.boundingBox;
-        if(mesh.name == 'vehicle_playerShip' || mesh.name == 'vehicle_enemyShip')
+        //Special case for player and enemy
+        if (mesh.name == 'vehicle_playerShip' || mesh.name == 'vehicle_enemyShip')
         {
+            //Shrink its collider/hitbox
             box = new THREE.Box3();
             let newMesh = mesh.parent.clone();
-            newMesh.scale.add(new THREE.Vector3(-0.001,-0.001,-0.001))
+            newMesh.scale.add(new THREE.Vector3(-0.001, -0.001, -0.001));
             box.setFromObject(newMesh);
         }
         shape = new CANNON.Box(new CANNON.Vec3(
@@ -575,178 +563,196 @@ function addPhysicalBody(mesh, bodyOptions)
     }
     var body = new CANNON.Body(bodyOptions);
     body.addShape(shape);
-    mesh.getWorldPosition(wroldpos)
-    body.position.copy(wroldpos);
+    body.position.copy(mesh.parent.position);
     body.computeAABB();
     // disable collision response so objects don't move when they collide
     // against each other
     body.collisionResponse = false;
     // keep a reference to the mesh so we can update its properties later
     body.mesh = mesh;
-    // body.name = "Cuerpo fisico";
     world.addBody(body);
     return body;
 }
 
-function updatePhysics(delta) {
+function updatePhysics(delta)
+{
     world.step(delta);
 
     world.contacts.forEach(function (contact) 
     {
-        console.log(contact)
-        if(contact.bj.tag == 'enemy')
+        //Enemy's colisions
+        if (contact.bj.tag == 'enemy')
         {
-            console.log(contact.bi.tag)
-            if(contact.bi.tag == 'planet')
+            //Enemy hits a planet
+            if (contact.bi.tag == 'planet')
+            {
+                let plnt = document.getElementById(contact.bi.mesh.name + "_t").className;
+                switch (plnt)
                 {
-                    let plnt = document.getElementById(contact.bi.mesh.name+"_t").className;
-                    switch (plnt) {
-                        case 'hit0':
-                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit1'
-                            break;
-                        case 'hit1':
-                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit2'
-                            break;
-                        case 'hit2':
-                            document.getElementById(contact.bi.mesh.name+"_t").className = 'hit3'
-                            planetArray.splice(planetArray.indexOf(contact.bi.ss),1);
-                            Enemies.forEach(alien => {
-                                if(alien.target_ss == contact.bi.ss)
-                                    alien.target_ss = planetArray[1 + Math.trunc(Math.random()*planetArray.length-1)];
-                            });
-                            scene.remove(contact.bi.mesh.parent);
-                            world.removeBody(contact.bi.mesh.parent.body);
-                            break;
-                        default:
-                            break;
-                    }
-                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
-                    world.removeBody(contact.bj.mesh.parent.body);
-                    scene.remove(contact.bj.mesh.parent);
-                    if(Enemies.length == 0)
-                    {
-                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped, at a cost';
-                        gameOver = true;
-                    }
+                    case 'hit0':
+                        document.getElementById(contact.bi.mesh.name + "_t").className = 'hit1'
+                        break;
+                    case 'hit1':
+                        document.getElementById(contact.bi.mesh.name + "_t").className = 'hit2'
+                        break;
+                    //Planet is destroyed and enemies that targeted it change target
+                    case 'hit2':
+                        document.getElementById(contact.bi.mesh.name + "_t").className = 'hit3'
+                        planetArray.splice(planetArray.indexOf(contact.bi.ss), 1);
+                        Enemies.forEach(alien =>
+                        {
+                            if (alien.target_ss == contact.bi.ss)
+                                alien.target_ss = planetArray[1 + Math.trunc(Math.random() * planetArray.length - 1)];
+                        });
+                        scene.remove(contact.bi.mesh.parent);
+                        world.removeBody(contact.bi);
+                        break;
+                    default:
+                        break;
                 }
-                if(contact.bi.tag == 'sun')
+                //Enemy is destroyed
+                Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent), 1);
+                world.removeBody(contact.bj);
+                scene.remove(contact.bj.mesh.parent);
+                //If no more enemies, game won
+                if (Enemies.length == 0)
                 {
-                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
-                    world.removeBody(contact.bj.mesh.parent.body);
-                    scene.remove(contact.bj.mesh.parent);
-                    if(Enemies.length == 0)
-                    {
-                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped, at a cost';
-                        gameOver = true;
-                    }
-                }
-                //Enemy is hit by laser
-                if(contact.bi.tag == 'lzr')
-                {
-                    Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent),1);
-                    world.removeBody(contact.bj.mesh.parent.body);
-                    scene.remove(contact.bj.mesh.parent);
-                    if(Enemies.length == 0)
-                    {
-                        document.getElementById("GameOver").innerHTML = 'Invasion Stopped';
-                        gameOver = true;
-                    }
-                }
-                if(contact.bi.tag == 'player')
-                {
+                    document.getElementById("GameOver").innerHTML = 'Invasion Stopped';
                     gameOver = true;
                 }
-                document.getElementById('n_enemies').innerHTML = 'Enemies: '+Enemies.length;
-        }
-        //Player collides with planet
-        if(contact.bj.tag == 'player')
-        {
-            if(contact.bi.tag == 'planet')
+            }
+            //Enemy hits sun
+            if (contact.bi.tag == 'sun')
+            {
+                //Enemy is destroyed
+                Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent), 1);
+                world.removeBody(contact.bj);
+                scene.remove(contact.bj.mesh.parent);
+                //If no more enemies, game won
+                if (Enemies.length == 0)
                 {
+                    document.getElementById("GameOver").innerHTML = 'Invasion Stopped';
                     gameOver = true;
                 }
+            }
+            //Enemy is hit by laser
+            if (contact.bi.tag == 'lzr')
+            {
+                //Enemy is destroyed
+                Enemies.splice(Enemies.indexOf(contact.bj.mesh.parent), 1);
+                world.removeBody(contact.bj);
+                scene.remove(contact.bj.mesh.parent);
+                //If no more enemies, game won
+                if (Enemies.length == 0)
+                {
+                    document.getElementById("GameOver").innerHTML = 'Invasion Stopped';
+                    gameOver = true;
+                }
+            }
+            //Enemy is hit by player, game is lost
+            if (contact.bi.tag == 'player')
+            {
+                gameOver = true;
+            }
+            document.getElementById('n_enemies').innerHTML = 'Enemies: ' + Enemies.length;
         }
-        
+        //Player collides with planet or sun, game is lost
+        if (contact.bj.tag == 'player')
+        {
+            if (contact.bi.tag == 'planet' || contact.bi.tag == 'sun')
+            {
+                gameOver = true;
+            }
+        }
+
     });
 };
 
 async function addPlayer()
 {
+    //wait for object to load
     player = await Objects['Player'];
+    //Shrink to a smaller scale
     player.scale.set(0.004, 0.004, 0.004);
+    //Start over Earth
     player.position.z = SolarDistances['Ea'] * au_to_er;
     player.position.y = 1 + Radii['Ea'];
     player.children[0].receiveShadow = true;
     player.children[0].castShadow = true;
-    player.children[0].geometry.rotateY(Math.PI) 
+    player.children[0].geometry.rotateY(Math.PI)
     playerMode = !playerMode;
     camera.position.z = player.position.z + 2.5;
     camera.position.y = player.position.y + 0.5;
     camera.position.x = player.position.x;
-    controls = new THREE.PlayerControls( camera , player );
-	controls.movementSpeed = 0.13;
+    //Initialise controls
+    controls = new THREE.PlayerControls(camera, player);
+    controls.movementSpeed = 0.21;
     controls.turnSpeed = 0.05;
     scene.add(player)
+    //Remove previous boundries
     player.children[0].geometry.boundingSphere = null;
     player.children[0].geometry.boundingBox = null;
-    playerbody = addPhysicalBody(player.children[0], {mass: 1});
+    playerbody = addPhysicalBody(player.children[0], { mass: 1 });
     playerbody.tag = 'player';
-    // register for collide events
-    playerbody.addEventListener('collide', function (e) {
-        //console.log(e);
-        //console.log('Collision!');
-    });
 }
 
+//Adds enemies to the game
 async function addEnemies()
 {
+    //Create enemies
     for (let index = 0; index < total_enemies; index++)
     {
-    let enemy = null
-    let enemy_type = Math.round(1 + Math.random() * 9);
-    enemy = await Objects['Enemy'+10%enemy_type];
-    switch(10%enemy_type)
-    {
-        case 0:
-            enemy.speed = 0.2/10;
-            break;
-        case 1:
-            enemy.speed = 0.2/8;
-            break;
-        case 2:
-            enemy.speed = 0.2/6;
-            break;
-        case 3:
-            enemy.speed = 0.2/5;
-            break;
-        case 4:
-            enemy.speed = 0.2/5;
-            break;
+        let enemy = null
+        let enemy_type = Math.round(1 + Math.random() * 9);
+        //Wait for randm enemy type to load
+        enemy = await Objects['Enemy' + 10 % enemy_type];
+        //Assign speed according to type
+        switch (10 % enemy_type)
+        {
+            case 0:
+                enemy.speed = 0.2 / 10;
+                break;
+            case 1:
+                enemy.speed = 0.2 / 8;
+                break;
+            case 2:
+                enemy.speed = 0.2 / 6;
+                break;
+            case 3:
+                enemy.speed = 0.2 / 5;
+                break;
+            case 4:
+                enemy.speed = 0.2 / 5;
+                break;
+        }
+        //Scale down
+        enemy.scale.set(0.02, 0.02, 0.02);
+        //Start above or below "horizon" to avoid spawn collisions
+        if (index % 2 == 0)
+            enemy.position.y = (Math.random() * -20) - 2;
+        else
+            enemy.position.y = (Math.random() * 20) + 2;
+        //Assign random starting position, between Mars and Uranus
+        let r = (SolarDistances['Ma'] + Math.random() * SolarDistances['Ur']) * au_to_er;
+        let t = radians(Math.random() * 360)
+        enemy.position.z = r * Math.cos(t)
+        enemy.position.x = r * Math.sin(t)
+        enemy.children[0].receiveShadow = true;
+        enemy.children[0].castShadow = true;
+        //Assign planet enemy will target
+        enemy.target_ss = planetArray[1 + Math.trunc(Math.random() * planetArray.length - 1)];
+        Targets.push(enemy.target_ss.sphere.name);
+        enemy.body = addPhysicalBody(enemy.children[0], { mass: 1 });
+        enemy.body.tag = 'enemy';
+        Enemies.push(enemy)
+        scene.add(enemy)
     }
-    enemy.scale.set(0.02, 0.02, 0.02);
-    if(index%2 == 0)
-    enemy.position.y = (Math.random() * -20) -2
-    else
-    enemy.position.y = (Math.random() * 20) +2
-    let r = (SolarDistances['Ma'] + Math.random() * SolarDistances['Sa']) * au_to_er;
-    let t = radians(Math.random() * 360)
-    enemy.position.z = r * Math.cos(t)
-    enemy.position.x = r * Math.sin(t)
-    enemy.children[0].receiveShadow = true;
-    enemy.children[0].castShadow = true;
-    enemy.target_ss = planetArray[1 + Math.trunc(Math.random()*planetArray.length -1)];
-    Targets.push(enemy.target_ss.sphere.name)
-    enemy.lookAt(enemy.target_ss.body.position)
-    enemy.body = addPhysicalBody(enemy.children[0], {mass: 1});
-    enemy.body.tag = 'enemy';
-    enemy.body.addEventListener('collide', function (e) {});
-    Enemies.push(enemy)
-    scene.add(enemy)
-}
-document.getElementById('n_enemies').innerHTML = 'Enemies: '+Enemies.length;
-document.getElementById('targets').innerHTML = 'Targets: '+Targets;
+    //Create nuber of enemies and starting targets
+    document.getElementById('n_enemies').innerHTML = 'Enemies: ' + Enemies.length;
+    document.getElementById('targets').innerHTML = 'Targets: ' + Targets;
 }
 
+//Pauses the game
 function gameSwitch()
 {
     gameIsOn = !gameIsOn;
@@ -762,7 +768,7 @@ function createScene(canvas)
     renderer.setSize(canvas.width, canvas.height);
 
     // Set shadow map
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Create a new Three.js scene
     scene = new THREE.Scene();
@@ -791,7 +797,7 @@ function createScene(canvas)
     //Add mouse handling so we can rotate the scene
     //controls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.update();
-                
+
     //Visualization functions
     adjustSizes();
     adjustDistances();

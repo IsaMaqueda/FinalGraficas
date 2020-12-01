@@ -7,7 +7,7 @@ button
 table
 {
     position: relative;
-    top: 630px;
+    top: 600px;
     color: black;
     width: 800px;
     text-align: center;
@@ -15,6 +15,41 @@ table
     font-weight: bold;
     font-size: 25px;
     background-color: rgb(59, 59, 59);
+}
+
+table.MainMenu
+{
+    top: 0px;
+}
+
+#Explore, #Play
+{
+    font-size: 60px;
+    width: 400px;
+}
+
+#Explore a, #Play a
+{
+    color: white;
+    text-decoration: none;
+}
+
+#Explore a:hover, #Play a:hover
+{
+    font-size: 70px;
+}
+
+#mmTitle h1
+{
+    width: 800px;
+    font-size: 70px;
+}
+
+#mmTitle h2
+{
+    width: 800px;
+    font-size: 30px;
+    font-weight: normal;
 }
 
 td
@@ -25,25 +60,25 @@ td
 td.hit0
 {
     color: black;
-    height: 40px;
+    height: 35px;
     background-color: rgb(46, 226, 46);
 }
 
 td.hit1
 {
-    height: 40px;
+    height: 35px;
     background-color: rgb(226, 214, 46);
 }
 
 td.hit2
 {
-    height: 40px;
+    height: 35px;
     background-color: rgb(189, 17, 17);
 }
 
 td.hit3
 {
-    height: 40px;
+    height: 35px;
     background-color: rgb(54, 54, 54);
 }
 
