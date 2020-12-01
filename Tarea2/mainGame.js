@@ -1,17 +1,18 @@
-let renderer = null,
-    controls = null,
-    scene = null,
-    world = null,
+//global variables 
+let renderer = null, //renderer variable
+    controls = null, //control variable
+    scene = null, // scene variable
+    world = null, //phisical world var 
     worldpos = new THREE.Vector3(),
-    camera = null,
-    player = null,
+    camera = null, //camera 
+    player = null, //player 
     playerbody = null, //Player Cannon body
     cameraTargetPlanet = null, //Planet camera points at
-    ambientLight = null,
-    playerMode = false,
-    gameIsOn = true,
-    gameOver = false,
-    total_enemies = 10,
+    ambientLight = null, //light 
+    playerMode = false, //if player is there
+    gameIsOn = true, //if user is playing game 
+    gameOver = false, //if game is over variable 
+    total_enemies = 10, //total number of enemies of the game 
     enemy_dir = new THREE.Vector3(), //Aides with assigning enemy direction
     global_rotation = true, //Boolean for global rotations
     global_translation = true, //Boolean for global transalations
@@ -34,8 +35,10 @@ let currentTime = Date.now();
 function animate() 
 {
     let now = Date.now();
+    //gets the diference between where the game started and where ot is at, 
     let deltat = now - currentTime;
     currentTime = now;
+    //gets a fraction 
     let fract = deltat / duration;
     //Each angle is equivalent to 1 Earth hour approximately
     let angle = Math.PI * 2 * fract;
@@ -52,6 +55,7 @@ function animate()
 
     //Iterate over each asteroid and apply rotation and translation
     //*  the 24 multiplier makes days into hours
+    //year speed and say speed are variables defined in unit.js 
     asteroidArray.forEach(asteroid =>
     {
         if (global_translation)
@@ -573,7 +577,7 @@ function addPhysicalBody(mesh, bodyOptions)
     world.addBody(body);
     return body;
 }
-
+//function to update the phisics of the game, this controls the collitions of an enemy, a planet the player 
 function updatePhysics(delta)
 {
     world.step(delta);
@@ -588,13 +592,15 @@ function updatePhysics(delta)
             {
                 let plnt = document.getElementById(contact.bi.mesh.name + "_t").className;
                 switch (plnt)
-                {
+                {   //if it hits a planet 1 time 
                     case 'hit0':
                         document.getElementById(contact.bi.mesh.name + "_t").className = 'hit1'
                         break;
+                        //if it hits a planet 2 time 
                     case 'hit1':
                         document.getElementById(contact.bi.mesh.name + "_t").className = 'hit2'
                         break;
+                        //if it hits a planet 3 time 
                     //Planet is destroyed and enemies that targeted it change target
                     case 'hit2':
                         document.getElementById(contact.bi.mesh.name + "_t").className = 'hit3'
@@ -668,6 +674,7 @@ function updatePhysics(delta)
     });
 };
 
+//function that adds a player to the scene 
 async function addPlayer()
 {
     //wait for object to load
@@ -677,22 +684,28 @@ async function addPlayer()
     //Start over Earth
     player.position.z = SolarDistances['Ea'] * au_to_er;
     player.position.y = 1 + Radii['Ea'];
+    //adds shadows 
     player.children[0].receiveShadow = true;
     player.children[0].castShadow = true;
     player.children[0].geometry.rotateY(Math.PI)
     playerMode = !playerMode;
+    //initializes the camera in the same position as the player 
     camera.position.z = player.position.z + 2.5;
     camera.position.y = player.position.y + 0.5;
     camera.position.x = player.position.x;
     //Initialise controls
     controls = new THREE.PlayerControls(camera, player);
+    //gives the speed 
     controls.movementSpeed = 0.21;
     controls.turnSpeed = 0.05;
+    //adds player to the scene 
     scene.add(player)
     //Remove previous boundries
     player.children[0].geometry.boundingSphere = null;
     player.children[0].geometry.boundingBox = null;
+    //adds a physical body to the layer 
     playerbody = addPhysicalBody(player.children[0], { mass: 1 });
+    //tags the player 
     playerbody.tag = 'player';
 }
 
@@ -703,6 +716,7 @@ async function addEnemies()
     for (let index = 0; index < total_enemies; index++)
     {
         let enemy = null
+        //gets a random type of enemy, each type has a diferent color, speed, damage and 3D model 
         let enemy_type = Math.round(1 + Math.random() * 9);
         //Wait for randm enemy type to load
         enemy = await Objects['Enemy' + 10 % enemy_type];
@@ -742,6 +756,7 @@ async function addEnemies()
         //Assign planet enemy will target
         enemy.target_ss = planetArray[1 + Math.trunc(Math.random() * planetArray.length - 1)];
         Targets.push(enemy.target_ss.sphere.name);
+        //adds a physical body to the enemy 
         enemy.body = addPhysicalBody(enemy.children[0], { mass: 1 });
         enemy.body.tag = 'enemy';
         Enemies.push(enemy)
@@ -758,6 +773,7 @@ function gameSwitch()
     gameIsOn = !gameIsOn;
 }
 
+//creates a scene with the canvas element 
 function createScene(canvas)
 {
     // Create the Three.js renderer and attach it to our canvas
