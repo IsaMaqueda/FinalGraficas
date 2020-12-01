@@ -1,3 +1,6 @@
+//source: class of Loaders, Computer Grafics
+
+//function that returns a if a promise is fullfiled while loading an object 
 function promisifyLoader ( loader, onProgress ) 
 {
     function promiseLoader ( url ) {
@@ -15,8 +18,10 @@ function promisifyLoader ( loader, onProgress )
     };
 }
 
+//error mesage 
 const onError = ( ( err ) => { console.error( err ); } );
 
+//function that loads an 3D object from a file. recieves as parameters the file, texture and normal map
 async function loadOBJ(obj_file,texture,normalMap)
 {
     let objPromiseLoader = promisifyLoader(new THREE.OBJLoader());
