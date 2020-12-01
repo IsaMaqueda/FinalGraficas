@@ -8,7 +8,7 @@
 ## Requerimientos Fucnionales
 * *Crea 8 planetas (y plutón), con sus respectivas lunas, el son, y el cinturón de asteroides.*
 * *Los planetas se crean como esferas*
-* *Los planetas y lunas tienen que tener su propia rotación. La rotacion esta de acuerdo con los valores reales, sacados de https://nssdc.gsfc.nasa.gov/planetary/factsheet/ y https://www.enchantedlearning.com/subjects/astronomy/planets/ * 
+* *Los planetas y lunas tienen que tener su propia rotación. La rotacion esta de acuerdo con los valores reales, sacados de https://nssdc.gsfc.nasa.gov/planetary/factsheet/ y https://www.enchantedlearning.com/subjects/astronomy/planets/* 
 * *Las lunas tienen que rotar al rededor de los planetas, y los planetas tienen que rotar al rededor del sol.*
 * *Dibujar orbitas reales de los planetas, donde la informacion fue sacada de https://www.hilarispublisher.com/open-access/mathematically-describing-planetary-orbits-in-two-dimensions-2168-9679-1000414.pdf*
 * *Asteroides no creado como esferas, sino con forma en 3D*
